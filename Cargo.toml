@@ -1,0 +1,42 @@
+[workspace]
+members = [
+    "drillx-cuda",
+    "ore-cli",
+    "jito-protos",
+    "searcher-client",
+]
+default-members = ["drillx-cuda","ore-cli","jito-protos","searcher-client"]
+exclude = ["craft"]
+resolver = "1"
+
+
+[workspace.dependencies]
+drillx-cuda = { path = "drillx-cuda" }
+jito-protos = { path = "jito-protos" }
+searcher-client = { path = "searcher-client" }
+bincode = "1.3.3"
+bs58 = "0.5.1"
+bytemuck = "1.16"
+cached = "0.46.1"
+chrono = "0.4.38"
+clap = { version = "4.4.12", features = ["derive"] }
+colored = "2.0"
+drillx = "=2.0.0"
+futures = "0.3.30"
+num_cpus = "1.16.0"
+ore-api = "=2.1.0"
+ore-utils = "=2.1.0"
+rand = "0.8.4"
+solana-cli-config = "1.18"
+solana-client = "1.18"
+solana-program = "1.18"
+solana-rpc-client = "1.18"
+solana-sdk = "1.18"
+solana-transaction-status = "1.18"
+solana-metrics = "=1.18"
+spl-token = { version = "^4", features = ["no-entrypoint"] }
+spl-associated-token-account = { version = "^2.3", features = [
+  "no-entrypoint",
+] }
+tokio = "1.35.1"
+equix = "0.1.4"

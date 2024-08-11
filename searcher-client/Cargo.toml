@@ -1,0 +1,19 @@
+[package]
+name = "searcher-client"
+version = "0.1.0"
+edition = "2021"
+description = "Wrapper around the generated gRPC. Adds auth and retry semantics."
+
+[dependencies]
+futures-util = "0.3.28"
+jito-protos = { workspace = true }
+log = "0.4"
+prost-types = "0.12"
+
+solana-client = { workspace = true }
+solana-metrics ={ workspace = true }
+solana-sdk = { workspace = true }
+solana-transaction-status = { workspace = true }
+thiserror = "1.0.40"
+tokio = "1"
+tonic = { version = "0.10", features = [ "tls", "tls-roots", "tls-webpki-roots"] }
