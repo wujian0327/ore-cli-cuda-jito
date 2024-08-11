@@ -62,7 +62,7 @@ impl Miner {
                 find_bus(),
                 solution,
             ));
-            self.send_and_confirm_d_jito(&ixs).await;
+            self.send_and_confirm(&ixs).await;
         }
     }
 
