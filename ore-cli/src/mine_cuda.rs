@@ -16,7 +16,6 @@ use tokio::task;
 
 use crate::{
     args::MineArgs,
-    send_and_confirm::ComputeBudget,
     utils::{amount_u64_to_string, get_config, get_proof_with_authority, proof_pubkey},
     Miner,
 };
@@ -80,13 +79,15 @@ impl Miner {
             let gpu_nonce_clone = gpu_nonce.clone();
             let cpu_nonce_clone = cpu_nonce.clone();
             let mut memory = equix::SolverMemory::new();
-            let hx1 = drillx::hash(
+            let hx1 = drillx::hash_with_memory(
+                &mut memory,
                 &proof.challenge,
                 &gpu_nonce_clone.lock().unwrap().to_le_bytes(),
             )
             .unwrap();
             let mut memory = equix::SolverMemory::new();
-            let hx2 = drillx::hash(
+            let hx2 = drillx::hash_with_memory(
+                &mut memory,
                 &proof.challenge,
                 &cpu_nonce_clone.lock().unwrap().to_le_bytes(),
             )
@@ -101,7 +102,7 @@ impl Miner {
             };
 
             let mut memory = equix::SolverMemory::new();
-            let hx = drillx::hash(&proof.challenge, &nonce.to_le_bytes())
+            let hx = drillx::hash_with_memory(&mut memory, &proof.challenge, &nonce.to_le_bytes())
                 .unwrap();
             let sol = Solution::new(hx.d, nonce.to_le_bytes());
 
@@ -124,9 +125,7 @@ impl Miner {
                 find_bus(),
                 sol,
             ));
-            self.send_and_confirm(&ixs, ComputeBudget::Fixed(compute_budget), false)
-            .await
-            .ok();
+            self.send_and_confirm_d_jito(&ixs).await;
         }
     }
 
@@ -202,7 +201,8 @@ impl Miner {
                         let mut best_hash = Hash::default();
                         loop {
                             // Create hash
-                            if let Ok(hx) = drillx::hash(
+                            if let Ok(hx) = drillx::hash_with_memory(
+                                &mut memory,
                                 &proof.challenge,
                                 &nonce.to_le_bytes(),
                             ) {
