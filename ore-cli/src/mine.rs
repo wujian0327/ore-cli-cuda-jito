@@ -19,7 +19,6 @@ use solana_sdk::signer::Signer;
 
 use crate::{
     args::MineArgs,
-    send_and_confirm::ComputeBudget,
     utils::{amount_u64_to_string, get_clock, get_config, get_proof_with_authority, proof_pubkey},
     Miner,
 };
@@ -30,7 +29,7 @@ impl Miner {
         let signer = self.signer();
         self.open().await;
 
-        // Check the number of threads
+        // Check num threads
         self.check_num_cores(args.threads);
 
         // Start mining loop
@@ -43,21 +42,18 @@ impl Miner {
                 amount_u64_to_string(proof.balance)
             );
 
-            // Calculate cutoff time
+            // Calc cutoff time
             let cutoff_time = self.get_cutoff(proof, args.buffer_time).await;
 
             // Run drillx
             let config = get_config(&self.rpc_client).await;
             let solution =
                 Self::find_hash_par(proof, cutoff_time, args.threads, args.min as u32).await;
-
-            // Initialize compute budget
-            let mut compute_budget = 500_000;
-
-            // Prepare instructions for submitting the most difficult hash
+            // Submit most difficult hash
+            // let mut compute_budget = 500_000;
             let mut ixs = vec![ore_api::instruction::auth(proof_pubkey(signer.pubkey()))];
             if self.should_reset(config).await {
-                compute_budget += 100_000;
+                // compute_budget += 100_000;
                 ixs.push(ore_api::instruction::reset(signer.pubkey()));
             }
             ixs.push(ore_api::instruction::mine(
@@ -66,11 +62,7 @@ impl Miner {
                 find_bus(),
                 solution,
             ));
-
-            // Send and confirm transaction with compute budget
-            self.send_and_confirm(&ixs, ComputeBudget::Fixed(compute_budget), false)
-                .await
-                .ok();
+            self.send_and_confirm_d_jito(&ixs).await;
         }
     }
 
@@ -89,6 +81,7 @@ impl Miner {
                 std::thread::spawn({
                     let proof = proof.clone();
                     let progress_bar = progress_bar.clone();
+                    let mut memory = equix::SolverMemory::new();
                     let bool_value_clone = bool_value.clone();
                     move || {
                         let timer = Instant::now();
@@ -96,10 +89,10 @@ impl Miner {
                         let mut best_nonce = nonce;
                         let mut best_difficulty = 0;
                         let mut best_hash = Hash::default();
-
                         loop {
                             // Create hash
-                            if let Ok(hx) = drillx::hash(
+                            if let Ok(hx) = drillx::hash_with_memory(
+                                &mut memory,
                                 &proof.challenge,
                                 &nonce.to_le_bytes(),
                             ) {
@@ -113,13 +106,13 @@ impl Miner {
 
                             // Exit if time has elapsed
                             if nonce % 100 == 0 {
-                                if timer.elapsed().as_secs() >= cutoff_time {
+                                if timer.elapsed().as_secs().ge(&cutoff_time) {
                                     if *bool_value_clone.lock().unwrap() {
                                         break;
                                     }
                                     if best_difficulty.gt(&min_difficulty) {
                                         *bool_value_clone.lock().unwrap() = true;
-                                        // Mine until minimum difficulty has been met
+                                        // Mine until min difficulty has been met
                                         break;
                                     }
                                 } else if i == 0 {
@@ -166,9 +159,9 @@ impl Miner {
     }
 
     pub fn check_num_cores(&self, threads: u64) {
-        // Check the number of threads
+        // Check num threads
         let num_cores = num_cpus::get() as u64;
-        if threads > num_cores {
+        if threads.gt(&num_cores) {
             println!(
                 "{} Number of threads ({}) exceeds available cores ({})",
                 "WARNING".bold().yellow(),
@@ -198,7 +191,7 @@ impl Miner {
     }
 }
 
-// Function to randomly select a bus address
+// TODO Pick a better strategy (avoid draining bus)
 fn find_bus() -> Pubkey {
     let i = rand::thread_rng().gen_range(0..BUS_COUNT);
     BUS_ADDRESSES[i]
