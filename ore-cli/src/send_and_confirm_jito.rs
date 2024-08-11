@@ -32,7 +32,7 @@ use tonic::{
 
 impl Miner {
     pub async fn send_and_confirm_d_jito(&self, ixs: &[Instruction]) {
-        let jito_auth = self.joti_auth.clone();
+        let jito_auth = self.jito_auth.clone();
         let feepayer = read_keypair_file(jito_auth.clone()).unwrap();
         let signer = self.signer();
         let auth: Arc<Keypair> = Arc::new(read_keypair_file(jito_auth).unwrap());
@@ -48,7 +48,7 @@ impl Miner {
 
         let mut vec_ixs = Vec::from(ixs);
 
-        let lamports = self.joti_fee;
+        let lamports = self.jito_fee;
 
         let jito_tip_ix = transfer(
             &feepayer.pubkey(),

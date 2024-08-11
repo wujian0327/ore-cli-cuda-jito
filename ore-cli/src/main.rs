@@ -31,8 +31,8 @@ use solana_sdk::{
 struct Miner {
     pub keypair_filepath: Option<String>,
     pub priority_fee: u64,
-    pub joti_fee: u64,
-    pub joti_auth: String,
+    pub jito_fee: u64,
+    pub jito_auth: String,
     pub rpc_client: Arc<RpcClient>,
 }
 
@@ -218,16 +218,16 @@ impl Miner {
     pub fn new(
         rpc_client: Arc<RpcClient>,
         priority_fee: u64,
-        joti_fee: u64,
+        jito_fee: u64,
         keypair_filepath: Option<String>,
-        joti_auth: String,
+        jito_auth: String,
     ) -> Self {
         Self {
             rpc_client,
             keypair_filepath,
             priority_fee,
-            joti_fee,
-            joti_auth,
+            jito_fee,
+            jito_auth,
         }
     }
 
