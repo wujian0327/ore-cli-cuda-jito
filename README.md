@@ -36,17 +36,23 @@ And jito_auth.json will pay gas fees.
 cargo build --release
 ```
 
+### mine with cpu and gpu
+
 ```shell
 cargo run --release   -- mine-cuda --keypair ./id.json --rpc RPC_URL  --priority-fee 0 --min 10 --threads 10  --jito-fee 5000 --jito-auth jito_auth.json --size 1
 ```
 
 The size parameter is the number of hashes that the GPU processes at one time. If it is too large, the gpu memory will not be enough.
 
-or
+### mine with cpu
 
-change the start.sh and run `./start.sh`
+```
+cargo run --release   -- mine --keypair ./id.json --rpc RPC_URL  --priority-fee 0 --min 10 --threads 10  --jito-fee 5000 --jito-auth jito_auth.json --size 1
+```
 
+you can use `start.sh` to  restart automatically 
 
+## reference
 
 my laptop 3060，12700h
 
