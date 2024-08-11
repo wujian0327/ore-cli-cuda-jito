@@ -126,7 +126,9 @@ impl Miner {
                 find_bus(),
                 sol,
             ));
-            self.send_and_confirm(&ixs).await;
+            self.send_and_confirm(&ixs, ComputeBudget::Fixed(compute_budget), false)
+                .await
+                .ok();
         }
     }
 
