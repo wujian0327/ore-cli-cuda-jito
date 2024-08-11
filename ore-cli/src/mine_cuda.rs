@@ -1,22 +1,25 @@
-use std::{
-    sync::{Arc, Mutex},
-    time::Instant,
+use std::{sync::Arc, sync::RwLock, time::Instant};
+use colored::*;
+use drillx::{
+    equix::{self},
+    Hash, Solution,
 };
-
-use drillx::{equix, Hash, Solution};
 use ore_api::{
-    consts::{BUS_ADDRESSES, BUS_COUNT},
-    state::Proof,
+    consts::{BUS_ADDRESSES, BUS_COUNT, EPOCH_DURATION},
+    state::{Bus, Config, Proof},
 };
+use ore_utils::AccountDeserialize;
 use rand::Rng;
 use solana_program::pubkey::Pubkey;
 use solana_rpc_client::spinner;
 use solana_sdk::signer::Signer;
-use tokio::task;
 
 use crate::{
     args::MineArgs,
-    utils::{amount_u64_to_string, get_config, get_proof_with_authority, proof_pubkey},
+    send_and_confirm::ComputeBudget,
+    utils::{
+        amount_u64_to_string, get_clock, get_config, get_updated_proof_with_authority, proof_pubkey,
+    },
     Miner,
 };
 
@@ -79,15 +82,13 @@ impl Miner {
             let gpu_nonce_clone = gpu_nonce.clone();
             let cpu_nonce_clone = cpu_nonce.clone();
             let mut memory = equix::SolverMemory::new();
-            let hx1 = drillx::hash_with_memory(
-                &mut memory,
+            let hx1 = drillx::hash(
                 &proof.challenge,
                 &gpu_nonce_clone.lock().unwrap().to_le_bytes(),
             )
             .unwrap();
             let mut memory = equix::SolverMemory::new();
-            let hx2 = drillx::hash_with_memory(
-                &mut memory,
+            let hx2 = drillx::hash(
                 &proof.challenge,
                 &cpu_nonce_clone.lock().unwrap().to_le_bytes(),
             )
