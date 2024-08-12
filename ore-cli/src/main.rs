@@ -128,7 +128,7 @@ struct Args {
         short,
         value_name = "jito_auth",
         help = "jito_auth",
-        global = true
+        global = false
     )]
     jito_auth: Option<String>,
 
