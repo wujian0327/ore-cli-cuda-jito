@@ -32,6 +32,11 @@ And jito_auth.json will pay gas fees.
 
 ## Get start
 
+```shell 
+sudo apt-get install protobuf-compiler
+export PROTOC=$(which protoc)
+```
+
 ```shell
 cargo build --release
 ```

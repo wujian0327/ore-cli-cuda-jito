@@ -2,6 +2,7 @@ use tonic_build::configure;
 
 fn main() {
     configure()
+        .protoc_arg("--experimental_allow_proto3_optional")
         .compile(
             &[
                 "protos/auth.proto",
